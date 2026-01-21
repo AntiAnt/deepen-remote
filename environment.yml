@@ -1,0 +1,32 @@
+name: deepen-remote
+
+channels:
+  - pytorch
+  - conda-forge
+  - defaults
+
+dependencies:
+  - python=3.12
+  - pip
+  - pytorch
+  - torchaudio
+  - numpy
+  - scipy
+  - pandas
+  - matplotlib
+  - scikit-learn
+  - sympy
+  - pillow
+  - librosa
+  - tqdm
+  - requests
+  - pyyaml
+  - jinja2
+  - sqlalchemy
+  - boto3
+  - dropbox
+  - s3transfer
+  - botocore
+
+  - pip:
+      - uv
