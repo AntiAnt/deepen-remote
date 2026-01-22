@@ -1,6 +1,4 @@
 import argparse
-import json
-import os
 
 from reliquery import Relic
 
@@ -29,24 +27,9 @@ def main():
     )
 
     args = parser.parse_args()
-
     relic_name = args.relic_name
     relic_type = args.relic_type
     storage_name = args.storage_name
-
-    try:
-        assert os.path.exists("~/reliquery/config")
-        config = None
-        with open("~/reliquery/config", "r") as f:
-            config = json.loads(f.read())
-
-        print(f"Reliquery Config:\n {config}")
-        assert storage_name in config
-        assert config[storage_name]["type"] == "S3"
-
-    except AssertionError as e:
-        raise AssertionError(f"Missing config:\n relic name:{relic_name}\n relic type: {relic_type}\n storage name: {storage_name}")
-    
 
     relic = Relic(name=relic_name, relic_type=relic_type, storage_name=storage_name)
 
