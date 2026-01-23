@@ -56,6 +56,7 @@ def main():
         relic = Relic(
             name=relic_name,
             relic_type=relic_type,
+            storage_name="remote_s3",
             reliquery_config_root=reliquery_config_root,
         )
     except Exception as e:
