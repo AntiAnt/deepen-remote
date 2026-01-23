@@ -1,4 +1,4 @@
-git+https://github.com/The-Dev-Effect/reliquery.git@main
+git+https://github.com/The-Dev-Effect/reliquery.git@passable-config
 aiohttp
 aiosignal
 alembic
