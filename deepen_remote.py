@@ -30,6 +30,14 @@ def main():
     relic_name = args.relic_name
     relic_type = args.relic_type
     storage_name = args.storage_name
+    import os
+
+    assert os.path.exists("/home/ubuntu/reliquery")
+    assert os.path.exists("/home/ubuntu/reliquery/config")
+    assert os.path.exists("~/reliquery/config")
+
+
+
 
     relic = Relic(name=relic_name, relic_type=relic_type, storage_name=storage_name)
 
