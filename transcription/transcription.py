@@ -174,7 +174,7 @@ class WhisperTranscriber:
 
         return "".join(text_lines)
 
-    def transcribe(self, audio: BytesIO) -> list:
+    def transcribe(self, audio: BytesIO) -> List:
         """
         Transcribe audio to list of segments.
         Returns: [{'start': float, 'end': float, 'text': str}]

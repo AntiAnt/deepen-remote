@@ -34,7 +34,7 @@ def main():
     pipeline = get_pipeline_service(remote_config)
     # transcription
 
-    transcription = pipeline.transcribe(relic.get_audio(name="audio.wav"))
+    transcription = pipeline.transcribe(audio_obj=relic.get_audio(name="audio.wav"))
     readable_transcript = pipeline.get_readable_transcript(transcription)
 
     relic.add_json(name="whisper-transcript", json_data=transcription)
