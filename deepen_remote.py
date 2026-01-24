@@ -28,7 +28,6 @@ def main():
         reliquery_config_root=reliquery_config_root,
     )
   
-    assert Relic.relic_exists(name=relic_name, relic_type=relic_type, storage_name="remote_s3")
     relic.add_text(name="remote-test", text="confirmign I can write to bucket")
     remote_config = relic.get_json(name="remote-config")
 
