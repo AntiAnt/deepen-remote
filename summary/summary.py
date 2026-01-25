@@ -4,7 +4,7 @@ import requests
 
 
 class LlamaMSummaryService:
-    def __init__(self, model: str = "llama3.1") -> None:
+    def __init__(self, model: str) -> None:
         self.model = model
 
     def summarize(self, transcript: str) -> str:
@@ -50,4 +50,5 @@ class LlamaMSummaryService:
 
 
 def get_summary_service(config: Dict):
+    print(f"SUMMARY CONFIG: {config}")
     return LlamaMSummaryService(model=config["models"]["llama"])
