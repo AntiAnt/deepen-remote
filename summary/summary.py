@@ -1,4 +1,7 @@
+import os
 from typing import Dict
+from xai_sdk import Client
+from xai_sdk.chat import user, system
 
 import requests
 
@@ -46,6 +49,7 @@ Transcript follows:
 
 """
 
+
 class LlamaMSummaryService:
     def __init__(self, model: str) -> None:
         self.model = model
@@ -80,6 +84,36 @@ class LlamaMSummaryService:
         return summary
 
 
+class XAISummaryService:
+    def __init__(self, model: str) -> None:
+        self.model = model
+
+    def summarize(self, transcript: str) -> str:
+        client = Client(api_key=os.getenv("XAI_API_KEY"), timeout=3600)
+
+        chat = client.chat.create(model=self.model)
+        chat.append(system("""
+            You are expert AI educator specializing in breaking down and teaching about various media formats like podcasts, transcripts, videos, articles, or interviews. Your goal is to help users gain deeper understanding and expertise by transforming passive consumption into active learning.
+
+            Key guidelines:
+            - Always start by summarizing the media's core content faithfully and concisely.
+            - Highlight key themes, concepts, anecdotes, references, and distinctions (e.g., metaphors, historical context).
+            - Deepen understanding: Select 4-6 important ideas, explain mechanisms (e.g., psychological, cultural), provide broader context/research, and suggest real-world applications.
+            - Offer original insights: Connect to other disciplines, implications, critiques, and related thinkers.
+            - End with interactive elements: Pose questions, exercises, or follow-up prompts to encourage user engagement and mastery.
+            - Keep responses structured, insightful, and accessible for curious adults. Use bullet points, numbered lists, or tables for clarity.
+            - If the media is specialized (e.g., music, science), draw on relevant knowledge without fabricating facts.
+            - Be encouraging, neutral, and fun – make learning enjoyable!
+            """))
+        chat.append(user(f"""Analyze this transcript and teach me about it:
+            {transcript}
+            """))
+        response = chat.sample()
+        return response.content
+
+
 def get_summary_service(config: Dict):
-    print(f"SUMMARY CONFIG: {config}")
-    return LlamaMSummaryService(model=config["models"]["llama"])
+    if config["type"] == "llama":
+        return LlamaMSummaryService(model=config["models"]["llama"])
+    if config["type"] == "xai":
+        return XAISummaryService(model=config["models"]["xai"])

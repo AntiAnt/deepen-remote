@@ -16,7 +16,7 @@ class DeepenPipelineRemote:
 
     def get_readable_transcript(self, turns: List | Dict) -> str:
         return self.transcription_service.get_readable_transcript(turns)
-    
+
     def transcribe(self, audio_obj: BytesIO) -> str:
         return self.transcription_service.transcribe(audio_obj)
 

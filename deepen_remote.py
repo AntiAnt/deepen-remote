@@ -27,7 +27,7 @@ def main():
         storage_name="remote_s3",
         reliquery_config_root=reliquery_config_root,
     )
-  
+
     relic.add_text(name="remote-test", text="confirmign I can write to bucket")
     remote_config = relic.get_json(name="remote-config")
 

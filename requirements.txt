@@ -87,6 +87,7 @@ tzdata
 urllib3
 vosk
 websockets
+xai-sdk
 yarl
 pyannote-audio
 soundfile
