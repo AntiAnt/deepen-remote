@@ -28,10 +28,10 @@ def main():
         reliquery_config_root=reliquery_config_root,
     )
 
-    relic.add_text(name="remote-test", text="confirmign I can write to bucket")
+    video_metadata = relic.get_json(name="metadata")
     remote_config = relic.get_json(name="remote-config")
 
-    pipeline = get_pipeline_service(remote_config)
+    pipeline = get_pipeline_service(remote_config, video_metadata)
     # transcription
 
     transcription = pipeline.transcribe(audio_obj=relic.get_audio(name="audio.wav"))

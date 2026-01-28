@@ -24,9 +24,11 @@ class DeepenPipelineRemote:
         return self.summary_service.summarize(transcript=transcript)
 
 
-def get_pipeline_service(config: Dict):
+def get_pipeline_service(config: Dict, metadata: Dict):
     transcription_service = get_transcription_service(config["transcription"])
-    summary_service = get_summary_service(config["summarization"])
+    summary_service = get_summary_service(
+        config["summarization"], metadata["youtube_url"]
+    )
     return DeepenPipelineRemote(
         transcription_service=transcription_service,
         summary_service=summary_service,

@@ -51,8 +51,9 @@ Transcript follows:
 
 
 class LlamaMSummaryService:
-    def __init__(self, model: str) -> None:
+    def __init__(self, model: str, video_url: str) -> None:
         self.model = model
+        self.video_url = video_url
 
     def summarize(self, transcript: str) -> str:
         prompt = "\n".join([PROMPT, transcript])
@@ -85,8 +86,9 @@ class LlamaMSummaryService:
 
 
 class XAISummaryService:
-    def __init__(self, model: str) -> None:
+    def __init__(self, model: str, video_url: str) -> None:
         self.model = model
+        self.video_url = video_url
 
     def summarize(self, transcript: str) -> str:
         client = Client(api_key=os.getenv("XAI_API_KEY"), timeout=3600)
@@ -105,15 +107,21 @@ class XAISummaryService:
             - If the media is specialized (e.g., music, science), draw on relevant knowledge without fabricating facts.
             - Be encouraging, neutral, and fun – make learning enjoyable!
             """))
-        chat.append(user(f"""Analyze this transcript and teach me about it:
+        chat.append(
+            user(
+                f"""Analyze this transcript and teach me about the subjects talked about. Create links in the markdown to connect me with relevant resources. Include the video url as a link in the description so anyone can navigate to it easily.
+            video url: {self.video_url}
+            transcript:
             {transcript}
-            """))
+            """
+            )
+        )
         response = chat.sample()
         return response.content
 
 
-def get_summary_service(config: Dict):
+def get_summary_service(config: Dict, video_url: str):
     if config["type"] == "llama":
         return LlamaMSummaryService(model=config["models"]["llama"])
     if config["type"] == "xai":
-        return XAISummaryService(model=config["models"]["xai"])
+        return XAISummaryService(model=config["models"]["xai"], video_url=video_url)
