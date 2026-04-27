@@ -179,13 +179,14 @@ class WhisperTranscriber:
         Transcribe audio to list of segments.
         Returns: [{'start': float, 'end': float, 'text': str}]
         """
+        print("[WhisperTranscriber] Initializing transcription.")
         segments, info = self.model.transcribe(
             audio=audio,
             beam_size=self.beam_size,
             language=self.language,
             vad_filter=True,  # Removes silence
         )
-
+        print(f"[WhisperTranscriber] Transcription complete; segments {len(segments)}")
         result = []
         for segment in segments:
             result.append(
