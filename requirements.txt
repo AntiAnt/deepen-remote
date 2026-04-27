@@ -91,3 +91,4 @@ xai-sdk
 yarl
 pyannote-audio
 soundfile
+python-docx

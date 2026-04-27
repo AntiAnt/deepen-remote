@@ -1,5 +1,5 @@
 import os
-from typing import Dict
+from typing import Dict, Optional
 from xai_sdk import Client
 from xai_sdk.chat import user, system
 
@@ -86,42 +86,83 @@ class LlamaMSummaryService:
 
 
 class XAISummaryService:
-    def __init__(self, model: str, video_url: str) -> None:
+    def __init__(
+        self, model: str, video_url: Optional[str] = None, prompt: Optional[str] = None
+    ) -> None:
         self.model = model
         self.video_url = video_url
+        self.prompt = prompt
+
+    def summarize_with_custom_promt(self, transcript: str, prompt: str) -> str:
+        client = Client(api_key=os.getenv("XAI_API_KEY"), timeout=3600)
+
+        chat = client.chat.create(model=self.model)
+
+        chat.append(
+            system(
+                "You are a world class educator dedicated to delivering the best material for sutdents to learn, grow and pass exams"
+            )
+        )
+
+        chat.append(user(f"""
+            {prompt}
+            Transcript:
+            {transcript}
+        """))
+
+        response = chat.sample()
+        return response.content
 
     def summarize(self, transcript: str) -> str:
         client = Client(api_key=os.getenv("XAI_API_KEY"), timeout=3600)
 
         chat = client.chat.create(model=self.model)
-        chat.append(system("""
-            You are expert AI educator specializing in breaking down and teaching about various media formats like podcasts, transcripts, videos, articles, or interviews. Your goal is to help users gain deeper understanding and expertise by transforming passive consumption into active learning.
+        if self.prompt is not None:
+            chat.append(system("""
+                You are expert AI educator specializing in breaking down and teaching about various media formats like podcasts, transcripts, videos, articles, or interviews. Your goal is to help users gain deeper understanding and expertise by transforming passive consumption into active learning.
 
-            Key guidelines:
-            - Always start by summarizing the media's core content faithfully and concisely.
-            - Highlight key themes, concepts, anecdotes, references, and distinctions (e.g., metaphors, historical context).
-            - Deepen understanding: Select 4-6 important ideas, explain mechanisms (e.g., psychological, cultural), provide broader context/research, and suggest real-world applications.
-            - Offer original insights: Connect to other disciplines, implications, critiques, and related thinkers.
-            - End with interactive elements: Pose questions, exercises, or follow-up prompts to encourage user engagement and mastery.
-            - Keep responses structured, insightful, and accessible for curious adults. Use bullet points, numbered lists, or tables for clarity.
-            - If the media is specialized (e.g., music, science), draw on relevant knowledge without fabricating facts.
-            - Be encouraging, neutral, and fun – make learning enjoyable!
-            """))
-        chat.append(
-            user(
-                f"""Analyze this transcript and teach me about the subjects talked about. Create links in the markdown to connect me with relevant resources. Include the video url as a link in the description so anyone can navigate to it easily.
-            video url: {self.video_url}
-            transcript:
-            {transcript}
-            """
+                Key guidelines:
+                - Always start by summarizing the media's core content faithfully and concisely.
+                - Highlight key themes, concepts, anecdotes, references, and distinctions (e.g., metaphors, historical context).
+                - Deepen understanding: Select 4-6 important ideas, explain mechanisms (e.g., psychological, cultural), provide broader context/research, and suggest real-world applications.
+                - Offer original insights: Connect to other disciplines, implications, critiques, and related thinkers.
+                - End with interactive elements: Pose questions, exercises, or follow-up prompts to encourage user engagement and mastery.
+                - Keep responses structured, insightful, and accessible for curious adults. Use bullet points, numbered lists, or tables for clarity.
+                - If the media is specialized (e.g., music, science), draw on relevant knowledge without fabricating facts.
+                - Be encouraging, neutral, and fun – make learning enjoyable!
+                """))
+            chat.append(
+                user(
+                    f"""Analyze this transcript and teach me about the subjects talked about. Create links in the markdown to connect me with relevant resources. Include the video url as a link in the description so anyone can navigate to it easily.
+                video url: {self.video_url if self.video_url is not None else "Unavailable"}
+                transcript:
+                {transcript}
+                """
+                )
             )
-        )
+        else:
+            chat.append(
+                system(
+                    "You are a world class educator dedicated to delivering the best material for sutdents to learn, grow and pass exams"
+                )
+            )
+
+            chat.append(user(f"""
+                {self.prompt}
+                Transcript:
+                {transcript}
+            """))
         response = chat.sample()
         return response.content
 
 
 def get_summary_service(config: Dict, video_url: str):
+
     if config["type"] == "llama":
         return LlamaMSummaryService(model=config["models"]["llama"])
     if config["type"] == "xai":
-        return XAISummaryService(model=config["models"]["xai"], video_url=video_url)
+        return XAISummaryService(
+            model=config["models"]["xai"],
+            video_url=video_url,
+            prompt=config.get("prompt"),
+        )
