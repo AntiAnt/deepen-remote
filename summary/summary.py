@@ -156,7 +156,7 @@ class XAISummaryService:
         return response.content
 
 
-def get_summary_service(config: Dict, video_url: str):
+def get_summary_service(config: Dict, video_url: Optional[str]):
 
     if config["type"] == "llama":
         return LlamaMSummaryService(model=config["models"]["llama"])
