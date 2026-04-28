@@ -33,12 +33,18 @@ def main():
 
     pipeline = get_pipeline_service(remote_config, video_metadata)
     # transcription
+    
+    if "whisper-transcript" in relic.list_json():
+        transcription = relic.get_json(name="whisper-transcript")
+    else:
+        transcription = pipeline.transcribe(audio_obj=relic.get_audio(name="audio.wav"))
+        relic.add_json(name="whisper-transcript", json_data=transcription)
 
-    transcription = pipeline.transcribe(audio_obj=relic.get_audio(name="audio.wav"))
-    readable_transcript = pipeline.get_readable_transcript(transcription)
-
-    relic.add_json(name="whisper-transcript", json_data=transcription)
-    relic.add_text(name="readable-whisper-transcript", text=readable_transcript)
+    if "readable-whisper-transcript" in relic.list_text():
+        readable_transcript = relic.get_text(name="readable-whisper-transcript")
+    else:
+        readable_transcript = pipeline.get_readable_transcript(transcription)
+        relic.add_text(name="readable-whisper-transcript", text=readable_transcript)
 
     # Summary
     summary = pipeline.summarize(transcript=readable_transcript)
