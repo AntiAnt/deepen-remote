@@ -186,7 +186,7 @@ class WhisperTranscriber:
             language=self.language,
             vad_filter=True,  # Removes silence
         )
-        print(f"[WhisperTranscriber] Transcription complete; segments {len(segments)}")
+        print(f"[WhisperTranscriber] Transcription complete")
         result = []
         for segment in segments:
             result.append(
