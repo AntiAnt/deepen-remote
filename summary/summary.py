@@ -173,5 +173,7 @@ def get_summary_service(config: Dict, video_url: Optional[str]):
         return XAISummaryService(
             model=config["models"]["xai"],
             video_url=video_url,
-            prompt=config.get("prompt"),
+            prompts=config.get("prompts"),
+            system_setup=config.get("system_setup"),
+            additional_context=config.get("additional_context")
         )
