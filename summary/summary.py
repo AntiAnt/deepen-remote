@@ -1,5 +1,5 @@
 import os
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 from xai_sdk import Client
 from xai_sdk.chat import user, system
 
@@ -50,6 +50,9 @@ Transcript follows:
 """
 
 
+DEFUALT_XAI_SYSTEM_SETUP = "You are a world class educator dedicated to delivering the best material for sutdents to learn, grow and pass exams. Always return in markdown and show the utmost professionalism"
+
+
 class LlamaMSummaryService:
     def __init__(self, model: str, video_url: str) -> None:
         self.model = model
@@ -87,37 +90,25 @@ class LlamaMSummaryService:
 
 class XAISummaryService:
     def __init__(
-        self, model: str, video_url: Optional[str] = None, prompt: Optional[str] = None
+        self,
+        model: str,
+        video_url: Optional[str] = None,
+        prompts: Optional[List[str]] = None,
+        system_setup: Optional[str] = DEFUALT_XAI_SYSTEM_SETUP,
+        additional_context: List[str] = [],
     ) -> None:
         self.model = model
         self.video_url = video_url
-        self.prompt = prompt
-
-    def summarize_with_custom_promt(self, transcript: str, prompt: str) -> str:
-        client = Client(api_key=os.getenv("XAI_API_KEY"), timeout=3600)
-
-        chat = client.chat.create(model=self.model)
-
-        chat.append(
-            system(
-                "You are a world class educator dedicated to delivering the best material for sutdents to learn, grow and pass exams"
-            )
-        )
-
-        chat.append(user(f"""
-            {prompt}
-            Transcript:
-            {transcript}
-        """))
-
-        response = chat.sample()
-        return response.content
+        self.prompts = prompts
+        self.system_setup = system_setup
+        self.additional_context = additional_context
 
     def summarize(self, transcript: str) -> str:
         client = Client(api_key=os.getenv("XAI_API_KEY"), timeout=3600)
 
         chat = client.chat.create(model=self.model)
-        if self.prompt is not None:
+
+        if self.prompts is None or len(self.prompts) == 0:
             chat.append(system("""
                 You are expert AI educator specializing in breaking down and teaching about various media formats like podcasts, transcripts, videos, articles, or interviews. Your goal is to help users gain deeper understanding and expertise by transforming passive consumption into active learning.
 
@@ -140,20 +131,38 @@ class XAISummaryService:
                 """
                 )
             )
-        else:
-            chat.append(
-                system(
-                    "You are a world class educator dedicated to delivering the best material for sutdents to learn, grow and pass exams"
-                )
-            )
 
-            chat.append(user(f"""
-                {self.prompt}
-                Transcript:
-                {transcript}
-            """))
-        response = chat.sample()
-        return response.content
+            return chat.sample().content.strip()
+        else:
+            responses = []
+            chat.append(system(self.system_setup))
+
+            for prompt in self.prompts:
+                user_msg = []
+                if (
+                    self.additional_context is not None
+                    and len(self.additional_context) > 0
+                ):
+                    user_msg.append(
+                        f"Additional Context: {self.additional_context}\n\n"
+                    )
+
+                if len(responses) > 0:
+                    user_msg.append(
+                        f"Previous responses:\n {'\n\n'.join(responses)}\n\n"
+                    )
+                user_msg.append(f"Full Transcription:\n {transcript}\n\n")
+                user_msg.append(f"Current task:\n {prompt}")
+
+                chat.append(user("\n\n".join(user_msg)))
+                response = chat.sample()
+                responses.append(response.content.strip())
+
+            final_response = "# Master Study Guide\n\n"
+            final_response += f"**Source**: {self.video_url if self.video_url is not None else 'Unavailable'}\n\n"
+            final_response += "\n\n".join(responses)
+
+            return final_response
 
 
 def get_summary_service(config: Dict, video_url: Optional[str]):
