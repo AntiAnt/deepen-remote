@@ -48,6 +48,16 @@ def generate_doc_from_md_string(text: str) -> Document:
             p = doc.add_paragraph()
             p.add_run(line.strip("*")).bold = True
 
+        elif "**" in line:
+            p = doc.add_paragraph()
+            parts = re.split(r'(\*\*.+?\*\*)', line)
+            for part in parts:
+                if part.startswith('**') and part.endswith('**'):
+                    run = p.add_run(part[2:-2])
+                    run.bold = True
+                else:
+                    p.add_run(part)
+
         # === Bullet points ===
         elif line.startswith("- ") or line.startswith("* "):
             p = doc.add_paragraph(line[2:], style="List Bullet")

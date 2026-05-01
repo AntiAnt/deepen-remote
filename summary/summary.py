@@ -158,9 +158,9 @@ class XAISummaryService:
                 response = chat.sample()
                 responses.append(response.content.strip())
 
-            final_response = "# Master Study Guide\n\n"
-            final_response += f"**Source**: {self.video_url if self.video_url is not None else 'Unavailable'}\n\n"
-            final_response += "\n\n".join(responses)
+            final_response = "\n\n".join(responses)
+            if self.video_url is not None:
+                final_response += f"**Source**: {self.video_url}" 
 
             return final_response
 
