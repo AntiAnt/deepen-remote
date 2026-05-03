@@ -158,9 +158,35 @@ class XAISummaryService:
                 response = chat.sample()
                 responses.append(response.content.strip())
 
-            final_response = "\n\n".join(responses)
+            concatenated_sections = "\n\n".join(responses)
+
+            polish_prompt = f"""
+                Here is the full concatenated content from previous analysis steps:
+
+                {concatenated_sections}
+
+                Transform this into **one cohesive, well-organized, professional educational document**.
+
+                Requirements:
+                - Remove repetition while keeping all important details
+                - Use simple, clear terminology with definitions for key terms the first time they appear
+                - Explain both the "what" and the "why" for important concepts
+                - Use clear, logical headings and subheadings
+                - Use **bold** for key terms and concepts
+                - Include practical field tips, common mistakes, and real-world considerations
+                - Make it easy for students to read, understand, and remember
+                - Maintain depth and accuracy — do not lose specific details
+                - Focus on content that helps students not only pass the NREMT exam but thrive as competent EMTs in the field
+                - End with the 10 quiz questions + detailed answer key
+
+                Return only the final polished document in clean Markdown. Do not add extra commentary.
+            """
+
+            chat.append(user(polish_prompt))
+            final_response = chat.sample().content.strip()
+            final_response += f"\n\n##Detailed Sections##\n{concatenated_sections}"
             if self.video_url is not None:
-                final_response += f"**Source**: {self.video_url}" 
+                final_response += f"**Source**: {self.video_url}"
 
             return final_response
 
@@ -175,5 +201,5 @@ def get_summary_service(config: Dict, video_url: Optional[str]):
             video_url=video_url,
             prompts=config.get("prompts"),
             system_setup=config.get("system_setup"),
-            additional_context=config.get("additional_context")
+            additional_context=config.get("additional_context"),
         )

@@ -50,9 +50,9 @@ def generate_doc_from_md_string(text: str) -> Document:
 
         elif "**" in line:
             p = doc.add_paragraph()
-            parts = re.split(r'(\*\*.+?\*\*)', line)
+            parts = re.split(r"(\*\*.+?\*\*)", line)
             for part in parts:
-                if part.startswith('**') and part.endswith('**'):
+                if part.startswith("**") and part.endswith("**"):
                     run = p.add_run(part[2:-2])
                     run.bold = True
                 else:
